@@ -1,0 +1,3 @@
+# Excluding html pages as they're created by a python script and so not part of the project 
+*.html
+!.gitignore
