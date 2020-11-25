@@ -1,0 +1,18 @@
+# C0 : nom de fichier
+# C1 : Etat        = 1 (repos) ; 2 (après effort)
+# C2 : Genre       = H (homme) ; F (femme)
+# C3 : Sportif     = O (oui) ; N (non)
+# C4 : respiration = N (normale) ; P (profonde)
+ECG1.txt 1 F N N
+ECG2.txt 1 F N N
+ECG3.txt 1 F N N
+ECG4.txt 1 F N N
+ECG5.txt 1 F N N
+ECG6.txt 1 F N N
+ECG7.txt 1 F N N
+ECG8.txt 1 F N N
+ECG9.txt 1 H N N
+ECG10.txt 1 H O N
+ECG11.txt 1 H O N
+ECG12.txt 1 H O P
+ECG13.txt 2 H N N

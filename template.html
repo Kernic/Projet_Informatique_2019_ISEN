@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset=utf-8 />
+        <link rel="stylesheet" type="text/css" href="./css/Preset_page.css">
+        <!-- Ici un exemple de mot clé pour un remplacement dynamique -->
+        <title>###Titre</title>  
+    </head>
+
+    <body> 
+<!-- Ce script permet l'affichage des courbes -->
+<script>  
+    function LineGraph(canvasId) {
+     //Interne - ne pas modifier ces valeurs
+     var canvas_ctx = null;
+     var canvas_obj = null;
+     var dataset = {serie: []};
+     var xLabelStep;
+     var yMax = 0;
+     var yMin = 0;
+  
+     //const: marge gauche et droite
+     var marginX = 30;
+     //const: marge en haut et en bas
+     var marginY = 20;
+     //nombre de valeur a afficher sur axe X
+     var yStep = 5;
+  
+  
+     //Constructor
+     var canvas_obj = document.getElementById(canvasId);
+     canvas_ctx = canvas_obj.getContext('2d');
+     //Dessiner un fond blanc
+     canvas_ctx.beginPath();
+     canvas_ctx.fillStyle = '#fff';
+     canvas_ctx.fillRect(0, 0, canvas_obj.width, canvas_obj.height);
+     canvas_ctx.stroke();
+  
+     /**
+      * Dessiner les axes verticaux
+      * @returns {undefined}
+      */
+     this.drawAxis = function() {
+         canvas_ctx.lineWidth = 2;
+         canvas_ctx.strokeStyle = '#333';
+         canvas_ctx.fillStyle = '#333';
+         canvas_ctx.beginPath();
+         canvas_ctx.textAlign = "right"
+         canvas_ctx.textBaseline = "middle";
+         //label de l'axe Y
+         var yVal;
+         for (var i = 0; i <= yStep; i++) {
+             yVal = yMin+((yMax-yMin) / yStep) * i;
+             //canvas_ctx.fillText(Math.round(yVal), marginX - 10, yValuetoGraph(yVal));
+             arrondi = yVal*10;      
+             arrondi = Math.round(arrondi); 
+             arrondi = arrondi/10;   
+             canvas_ctx.fillText(arrondi, marginX - 10, yValuetoGraph(yVal));
+         }
+         canvas_ctx.stroke();
+         //Barre verticales
+         canvas_ctx.beginPath();
+         canvas_ctx.strokeStyle = '#666';
+         canvas_ctx.lineWidth = .5;
+         for (var i = 0; i <= yStep; i++) {
+             yVal = yMin+((yMax-yMin) / yStep) * i;
+             canvas_ctx.moveTo(marginX, yValuetoGraph(yVal) + 2);
+             canvas_ctx.lineTo(canvas_obj.width - marginX, yValuetoGraph(yVal) + 2);
+         }
+  
+         canvas_ctx.stroke();
+         calcXStep();
+     }
+  
+     /**
+      * Ajouter une valeur X,Y à la serie
+      * @param {string} x
+      * @param {int} y 
+      */
+     this.addPoint = function(x, y) {
+         dataset.serie.push({X: x, Y: y});
+         if (y > yMax) {
+             yMax = y;
+         }
+         if (y < yMin) {
+             yMin = y;
+         }
+     }
+  
+     /**
+      * Dessiner la courbe
+      */
+     this.drawLine = function() {
+         canvas_ctx.beginPath();
+         canvas_ctx.strokeStyle = '#DF4926';
+         canvas_ctx.lineWidth = 1;
+         canvas_ctx.moveTo(xValuetoGraph(0), yValuetoGraph(dataset.serie[0].Y));
+         //line
+         for (var i = 1; i < dataset.serie.length; i++) {
+             canvas_ctx.lineTo(xValuetoGraph(i), yValuetoGraph(dataset.serie[i].Y));
+         }
+         canvas_ctx.stroke();
+         //point
+         canvas_ctx.fillStyle = '#333';
+         for (var i = 0; i < dataset.serie.length; i++) {
+             /* canvas_ctx.beginPath();
+              canvas_ctx.arc(xValuetoGraph(i), yValuetoGraph(dataset.serie[i].Y), 4, 0, Math.PI * 2, true);
+              canvas_ctx.fill();*/
+         }
+  
+         //label x
+         canvas_ctx.beginPath();
+         var ilabelstep = xLabelStep;
+         for (var i = 0; i < dataset.serie.length; i++) {
+             //Bidouillage pour eviter la superposition de label sur l'axe X
+             if (xLabelStep > 1) {
+                 if (ilabelstep >= xLabelStep) {
+                     canvas_ctx.fillText(dataset.serie[i].X, xValuetoGraph(i) + (marginX / 2), yValuetoGraph(0) + (marginY / 2) + 5);
+                     ilabelstep = 0;
+                 }
+                 ilabelstep++;
+             } else {
+                 canvas_ctx.fillText(dataset.serie[i].X, xValuetoGraph(i) + (marginX / 2), yValuetoGraph(0) + (marginY / 2) + 5);
+             }
+         }
+         
+         canvas_ctx.stroke();
+     }
+  
+     /**
+      * Regle par 3 pour X
+      * @param {type} xIdx
+      */
+     function xValuetoGraph(xIdx) {
+         var serielen = dataset.serie.length;
+         var xArea = canvas_obj.width - (marginX * 2);
+         var xPos = ((xArea / serielen) * xIdx) + marginX;
+         return xPos;
+     }
+  
+     /**
+      * Regle par 3 pour Y
+      * @param {type} xIdx
+      */
+     function yValuetoGraph(yVal) {
+         var yArea = canvas_obj.height - (marginY * 2);
+         //var yPos = canvas_obj.height - marginY - ((yVal * yArea) / yMax);
+         var yPos = canvas_obj.height - marginY - (((yVal-yMin) * yArea) / (yMax-yMin));
+         return yPos;
+     }
+  
+     /**
+      * Définir le nombre de label sur l'axe X
+      * @returns {undefined}
+      */
+     function calcXStep() {
+         var text;
+         var xArea = canvas_obj.width - (marginX * 2);
+         for (var i = 0; i < dataset.serie.length; i++) {
+             text += ' ' + dataset.serie[i].X + ' ';
+         }
+         var metrics = canvas_ctx.measureText(text);
+         var width = metrics.width;
+         xLabelStep = Math.round(width / xArea);
+     }
+    }
+    </script>
+
+        <!-- ici la zone d'affichage de la courbe -->
+        <div class="page">
+            <div class="haut">
+                <!--Titre de la page-->
+
+                <div class="Titre"><h1>###Titre</h1></div>
+                
+                <div class="labo">
+                    <!--Logo du laboratoire-->
+                    <img class="logo" src="./ressource/Imperial_Colege_Laboratory.png" alt="Imperial_Colege_Laboratory.png">
+                    <div class="adresse">55 Rue du Faubourg Saint-Honoré, 75008 Paris<br/></div>
+                </div>
+            </div>
+            
+            <div class="button">
+                <button onclick="window.location.href='./Home.html';">Retour au menu</button>
+                <br><br>Analyse<br>
+                <ul class="ulist">
+				<!--###StartVM-->
+                    
+				<!--###EndVM-->	
+                </ul>
+            </div>
+
+            <div class="courbeDiv">
+				<br>Evolution des bpm<br>
+                <canvas id="courbeBPM" width="600" height="400"></canvas>
+                <!--BaliseBPM-->
+                
+            </div>
+            
+            <div class="courbeECG">
+				<br>Evolution de l'ECG<br>
+                <canvas id="courbe" width="600" height="400"></canvas>
+                
+            </div>
+
+            <div class="button">
+                <button onclick="window.location.href='./Home.html';">Retour au menu</button>
+            </div>
+        </div>
+        
+    <!-- Ceci est un exemple d'utilisation de la fonction javascript ci-dessus   -->
+    <!-- à remplacer pour faire des affichages en fonction de données dynamiques -->
+        <script>
+            var lineGraph = new LineGraph("courbeBPM");
+//BEGIN DRAW GRAPH
+			
+			
+			
+			
+//END DRAW GRAPH
+            lineGraph.drawAxis();
+            lineGraph.drawLine();
+        </script>
+        <script>
+            var lineGraph2 = new LineGraph("courbe");
+//BEGIN DRAW ECG
+			
+			
+			
+			
+//END DRAW ECG
+            lineGraph2.drawAxis();
+            lineGraph2.drawLine();
+        </script>
+    </body>
+</html>
